@@ -1,0 +1,10 @@
+providers:
+  kubernetesIngress:
+    enabled: false 
+
+  kubernetesGateway:
+    enabled: true
+    namespaces: []
+
+gateway:
+  enabled: true

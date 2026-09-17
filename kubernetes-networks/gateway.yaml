@@ -3,12 +3,16 @@ kind: Gateway
 metadata:
   name: homework-http-gateway
   namespace: homework
+  annotations:
+    traefik.io/gateway.entrypoints: web
 spec:
   gatewayClassName: traefik
   listeners:
-    - name: http-listener
-      protocol: HTTP
-      port: 80
-      allowedRoutes:
-        namespaces:
-          from: All
+  - name: http-listener
+    protocol: HTTP
+    port: 8000 
+    hostname: "homework.otus"
+    allowedRoutes:
+      namespaces:
+        from: Same
+

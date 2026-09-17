@@ -6,8 +6,8 @@ metadata:
 spec:
   selector:
     app: homework
-  ports:
-    protocol: TCP
-    port: 8080
-    targetPort: 8000
   type: ClusterIP
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8000

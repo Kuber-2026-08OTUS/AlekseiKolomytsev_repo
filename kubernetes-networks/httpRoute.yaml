@@ -8,7 +8,7 @@ spec:
     - name: homework-http-gateway
       namespace: homework
   hostnames:
-    - "homework.otus"
+     - "homework.otus"
   rules:
     - matches:
         - path:
