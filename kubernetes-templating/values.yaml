@@ -1,0 +1,54 @@
+replicaCount: 3
+
+image:
+  repository: python
+  tag: "3.11-slim"
+  pullPolicy: IfNotPresent
+
+initImages:
+  htmlGenerator:
+    repository: busybox
+    tag: "1.36"
+  metricsFetcher:
+    repository: curlimages/curl
+    tag: "8.10.1"
+
+containerPort: 8000
+service:
+  type: ClusterIP
+  port: 8000
+
+readinessProbe:
+  enabled: true
+  path: /index.html
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 2
+
+livenessProbe:
+  enabled: false
+  path: /index.html
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  failureThreshold: 3
+
+persistence:
+  enabled: true
+  size: 1Gi
+  accessMode: ReadWriteOnce
+
+configMap:
+  enabled: true
+  data:
+    app.conf: |
+      # test config
+      env = "preprod"
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false

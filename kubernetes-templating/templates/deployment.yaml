@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "homework.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "homework.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "homework.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "homework.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "homework.saName" . }}
+      initContainers:
+        - name: html-generator
+          image: "{{ .Values.initImages.htmlGenerator.repository }}:{{ .Values.initImages.htmlGenerator.tag }}"
+          command: ['sh', '-c', 'echo "<h1>Hello from Helm!</h1>" > /init/index.html']
+          volumeMounts:
+            - name: html-data
+              mountPath: /init
+        - name: metrics-fetcher
+          image: "{{ .Values.initImages.metricsFetcher.repository }}:{{ .Values.initImages.metricsFetcher.tag }}"
+          command:
+            - sh
+            - -c
+            - |
+              curl -s -k \
+                -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+                https://kubernetes.default.svc/metrics -o /init/metrics.html
+              echo "metrics saved: $(wc -c < /init/metrics.html) bytes"
+          volumeMounts:
+            - name: html-data
+              mountPath: /init
+      containers:
+        - name: web-server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ['python3', '-m', 'http.server', '{{ .Values.containerPort }}', '--directory', '/homework']
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          volumeMounts:
+            - name: html-data
+              mountPath: /homework
+            {{- if .Values.configMap.enabled }}
+            - name: config-volume
+              mountPath: /homework/conf
+            {{- end }}
+      volumes:
+        - name: html-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "homework.pvcName" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.configMap.enabled }}
+        - name: config-volume
+          configMap:
+            name: {{ include "homework.fullname" . }}-cm
+        {{- end }}
