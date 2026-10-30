@@ -52,3 +52,10 @@ redis:
   master:
     persistence:
       enabled: false
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/redis
+      # tag: 20.6.0
+  global:
+    security:
+      allowInsecureImages: true

@@ -1,0 +1,69 @@
+releases:
+  # --- Prod окружение (5 брокеров, SASL) ---
+  - name: kafka-prod
+    namespace: prod
+    createNamespace: true
+    chart: oci://registry-1.docker.io/bitnamicharts/kafka
+    values:
+      - replicaCount: 5
+      # В новых версиях чарта используется KRaft, контроллеры разворачиваются отдельно
+      - controller:
+          replicaCount: 3 
+      - image:
+          registry: docker.io
+          repository: bitnamilegacy/kafka
+          tag: 3.5.2-debian-11-r1
+      # Настройка протоколов
+      - listeners:
+          client:
+            protocol: SASL_PLAINTEXT
+          interbroker:
+            protocol: SASL_PLAINTEXT
+          controller:
+            protocol: SASL_PLAINTEXT
+      - auth:
+          clientProtocol: sasl
+          interBrokerProtocol: sasl
+      # Ограничиваем ресурсы, чтобы 8+ подов вообще влезли в minikube
+      - resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 512Mi
+      # Отключаем персистентность для экономии места
+      - persistence:
+          enabled: false
+
+  # --- Dev окружение (1 брокер, PLAINTEXT) ---
+  - name: kafka-dev
+    namespace: dev
+    createNamespace: true
+    chart: oci://registry-1.docker.io/bitnamicharts/kafka
+    values:
+      - replicaCount: 1
+      - controller:
+          replicaCount: 1
+      - image:
+          registry: docker.io
+          repository: bitnamilegacy/kafka
+          tag: latest
+      - listeners:
+          client:
+            protocol: PLAINTEXT
+          interbroker:
+            protocol: PLAINTEXT
+          controller:
+            protocol: PLAINTEXT
+      - auth:
+          clientProtocol: plaintext
+          interBrokerProtocol: plaintext
+      # Минимальные ресурсы
+      - resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 512Mi
+      - persistence:
+          enabled: false
