@@ -8,5 +8,5 @@ appVersion: "1.0.0"
 dependencies:
   - name: redis
     version: "20.6.x"
-    repository: "https://charts.bitnami.com/bitnami"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: redis.enabled
