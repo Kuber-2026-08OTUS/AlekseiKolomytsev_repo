@@ -1,0 +1,27 @@
+🎉 Приложение {{ .Release.Name }} успешно установлено!
+
+  Namespace:  {{ .Release.Namespace }}
+  Реплик:     {{ .Values.replicaCount }}
+
+────────────────────────────────────────────────────────────
+ Доступ к приложению
+────────────────────────────────────────────────────────────
+{{- if eq .Values.service.type "NodePort" }}
+  Открывайте (подставьте IP ноды):
+    http://<node-ip>:{{ .Values.service.port }}/index.html
+    http://<node-ip>:{{ .Values.service.port }}/metrics.html
+{{- else }}
+  Пробросьте порт на локальную машину:
+    kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "homework.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+  
+  Затем откройте в браузере:
+    http://localhost:{{ .Values.service.port }}/index.html
+    http://localhost:{{ .Values.service.port }}/metrics.html
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+────────────────────────────────────────────────────────────
+ Redis развернут как зависимость.
+  Хост: {{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local
+  Порт: 6379
+{{- end }}

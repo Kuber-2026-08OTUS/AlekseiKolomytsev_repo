@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  registry: docker.io
+  repository: bitnamilegacy/kafka
+    #tag: 3.5.2-debian-11-r1
+
+# Настройка слушателей для SASL_PLAINTEXT
+listeners:
+  client:
+    protocol: SASL_PLAINTEXT
+  interbroker:
+    protocol: SASL_PLAINTEXT
+  controller:
+    protocol: SASL_PLAINTEXT
+
+# Включение SASL-авторизации
+auth:
+  clientProtocol: sasl
+  interBrokerProtocol: sasl

@@ -1,0 +1,18 @@
+replicaCount: 1
+
+image:
+  registry: docker.io
+  repository: bitnamilegacy/kafka
+  tag: latest
+
+listeners:
+  client:
+    protocol: PLAINTEXT
+  interbroker:
+    protocol: PLAINTEXT
+  controller:
+    protocol: PLAINTEXT
+
+auth:
+  clientProtocol: plaintext
+  interBrokerProtocol: plaintext
