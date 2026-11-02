@@ -2,7 +2,7 @@ apiVersion: otus.homework/v1
 kind: MySQL
 metadata:
   name: my-custom-mysql
-  namespace: homework
+  namespace: default
 spec:
   image: "mysql:8.0"
   database: "otus_db"
