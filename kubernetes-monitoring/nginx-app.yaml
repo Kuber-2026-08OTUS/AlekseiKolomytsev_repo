@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-otus
+  namespace: homework
+  labels:
+    app: nginx-otus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-otus
+  template:
+    metadata:
+      labels:
+        app: nginx-otus
+    spec:
+      containers:
+        - name: nginx
+          image: akolomytsev-nginx:1.0
+          imagePullPolicy: never
+          ports:
+            - name: http
+              containerPort: 8080
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:1.5.1
+          args:
+            - "--nginx.scrape-uri=http://localhost:8080/stub_status"
+          ports:
+            - name: metrics
+              containerPort: 9113
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-otus
+  namespace: homework
+  labels:
+    app: nginx-otus
+spec:
+  selector:
+    app: nginx-otus
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+    - name: metrics
+      port: 9113
+      targetPort: 9113
